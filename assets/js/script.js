@@ -1,26 +1,20 @@
 var tasks = {};
 
+// function to create task on the ui
 var createTask = function(taskText, taskDate, taskList) {
   // create elements that make up a task item
   var taskLi = $("<li>").addClass("list-group-item");
-  var taskSpan = $("<span>")
-    .addClass("badge badge-primary badge-pill")
-    .text(taskDate);
-  var taskP = $("<p>")
-    .addClass("m-1")
-    .text(taskText);
-
+  var taskSpan = $("<span>").addClass("badge badge-primary badge-pill").text(taskDate);
+  var taskP = $("<p>").addClass("m-1").text(taskText);
   // append span and p element to parent li
   taskLi.append(taskSpan, taskP);
-
-
   // append to ul list on the page
   $("#list-" + taskList).append(taskLi);
 };
 
+// function to load task to ui
 var loadTasks = function() {
   tasks = JSON.parse(localStorage.getItem("tasks-list"));
-
   // if nothing in localStorage, create a new object to track all task status arrays
   if (!tasks) {
     tasks = {
@@ -30,7 +24,6 @@ var loadTasks = function() {
       done: []
     };
   }
-
   // loop over object properties
   $.each(tasks, function(list, arr) {
     // then loop over sub-array
@@ -40,11 +33,11 @@ var loadTasks = function() {
   });
 };
 
+// save task to local storage
 var saveTasks = function() {
   localStorage.setItem("tasks-list", JSON.stringify(tasks));
 };
 
-// event delagation
 // click on the task to edit it 
 $(".list-group").on("click", "p", function() {
   // get the text of the p element
@@ -58,6 +51,7 @@ $(".list-group").on("click", "p", function() {
   $(this).replaceWith(textInput);
   textInput.trigger("focus");
 });
+
 // click off the textarea to save the new task
 $(".list-group").on("blur", "textarea", function() {
   // the current value of the element
@@ -71,10 +65,10 @@ $(".list-group").on("blur", "textarea", function() {
   saveTasks();
   // recreate p element
   var taskP = $("<p>").addClass("m-1").text(text);
-
   // replace textarea with p element
   $(this).replaceWith(taskP);
 });
+
 // click on due date to edit it 
 $(".list-group").on("click", "span", function() {
   // get current text 
@@ -86,6 +80,7 @@ $(".list-group").on("click", "span", function() {
   // focus the new element
   dateInput.trigger("focus");
 });
+
 // click off the dateInput to save the new date
 $(".list-group").on("blur", "input[type='text']", function() {
   // the current value of the element
@@ -102,7 +97,6 @@ $(".list-group").on("blur", "input[type='text']", function() {
   // replace input with span element
   $(this).replaceWith(taskSpan);
 });
-
 
 // modal was triggered
 $("#task-form-modal").on("show.bs.modal", function() {
@@ -121,22 +115,19 @@ $("#task-form-modal .btn-primary").click(function() {
   // get form values
   var taskText = $("#modalTaskDescription").val();
   var taskDate = $("#modalDueDate").val();
-
   if (taskText && taskDate) {
     createTask(taskText, taskDate, "toDo");
-
     // close modal
     $("#task-form-modal").modal("hide");
-
     // save in tasks array
     tasks[toDo].push({
       text: taskText,
       date: taskDate
     });
-
     saveTasks();
   }
 });
+
 // remove all tasks
 $("#remove-tasks").on("click", function() {
   for (var key in tasks) {
@@ -147,8 +138,6 @@ $("#remove-tasks").on("click", function() {
 });
 
 // jqueryUI 
-
-
 // drag and sort list items in their own list and between list
 $(".card .list-group").sortable({
   connectWith: $(".card .list-group"),
@@ -170,7 +159,7 @@ $(".card .list-group").sortable({
   update: function(event) {
     // array to store the task data in
     var tempArr = []
-
+    // loop through each children of the current ul element
     $(this).children().each(function() {
       var text = $(this)
         .find("p")
@@ -188,9 +177,25 @@ $(".card .list-group").sortable({
     });
     // get the corresponding array name from the id atrribute by removing the "list-"
     var arrName = $(this).attr("id").replace("list-", "");
+    // update the corresponding tasks array
     tasks[arrName] = tempArr;
-
+    // save tasks obj to local storage
     saveTasks();
+  }
+});
+
+// make the div#trash a droppable to accept the list elements
+$("#trash").droppable({
+  accept: ".card .list-group-item",
+  tolerance: "touch",
+  drop: function(event, ui) {
+    ui.draggable.remove();
+  },
+  over: function(event, ui) {
+    // console.log("over");
+  },
+  out: function(event, ui) {
+    // console.log("out");
   }
 });
 
