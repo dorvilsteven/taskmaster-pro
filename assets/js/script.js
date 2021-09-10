@@ -77,12 +77,20 @@ $(".list-group").on("click", "span", function() {
   var dateInput = $("<input>").attr("type", "text").val(date);
   // swap out elements
   $(this).replaceWith(dateInput);
+  // enable jquery ui datepicker()
+  dateInput.datepicker({
+    minDate: 1,
+    onClose: function() {
+      // when calendar is closed, force a "change" event on the `dateInput`
+      $(this).trigger("change");
+    }
+  });
   // focus the new element
   dateInput.trigger("focus");
 });
 
 // click off the dateInput to save the new date
-$(".list-group").on("blur", "input[type='text']", function() {
+$(".list-group").on("change", "input[type='text']", function() {
   // the current value of the element
   var date = $(this).val().trim();
   // the parent elements ID
@@ -120,7 +128,7 @@ $("#task-form-modal .btn-primary").click(function() {
     // close modal
     $("#task-form-modal").modal("hide");
     // save in tasks array
-    tasks[toDo].push({
+    tasks.toDo.push({
       text: taskText,
       date: taskDate
     });
@@ -198,6 +206,11 @@ $("#trash").droppable({
     // console.log("out");
   }
 });
+
+$("#modalDueDate").datepicker({
+  minDate: 1
+});
+
 
 // load tasks for the first time
 loadTasks();
